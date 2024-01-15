@@ -7,7 +7,7 @@ from __future__ import print_function
     This uses the Python type P4API.P4Adapter, which is a wrapper for the
     Perforce ClientApi object.
     
-    $Id: //depot/main/p4-python/P4.py#105 $
+    $Id: //depot/r21.1/p4-python/P4.py#1 $
     
     #*******************************************************************************
     # Copyright (c) 2007-2010, Perforce Software, Inc.  All rights reserved.
@@ -595,7 +595,10 @@ class P4(P4API.P4Adapter):
         if hasattr(self,"encoding") and self.encoding and not self.encoding == 'raw':
             result = []
             for s in flatArgs:
-                result.append( s.encode(self.encoding) )
+                if isinstance(s, str):
+                    result.append( s.encode(self.encoding) )
+                else:
+                    result.append(s)
             flatArgs = result
         
         if self.logger:
@@ -884,6 +887,8 @@ class P4(P4API.P4Adapter):
             self.client = oldName
             
         finally:
+            ws._options = ws._options.replace(' locked ',' unlocked ')    
+            self.save_client(ws)    
             self.delete_client(name)
             shutil.rmtree(root)
 
